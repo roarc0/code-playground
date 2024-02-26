@@ -1,0 +1,13 @@
+[package]
+name = "greet"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[profile.release]
+strip = "debuginfo"
+
+[dependencies]
+libc = "0.2.153"
