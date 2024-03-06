@@ -1,4 +1,0 @@
-[workspace]
-
-resolver = "2"
-members = ["katas_and_snippets", "ron_example"]

@@ -7,15 +7,15 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug executable 'rs'",
+      "name": "Debug executable 'nom_test'",
       "cargo": {
         "args": [
           "build",
-          "--bin=rs",
-          "--package=rs"
+          "--bin=nom_test",
+          "--package=nom_test"
         ],
         "filter": {
-          "name": "rs",
+          "name": "nom_test",
           "kind": "bin"
         }
       },
@@ -25,16 +25,16 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests in executable 'rs'",
+      "name": "Debug unit tests in executable 'nom_test'",
       "cargo": {
         "args": [
           "test",
           "--no-run",
-          "--bin=rs",
-          "--package=rs"
+          "--bin=nom_test",
+          "--package=nom_test"
         ],
         "filter": {
-          "name": "rs",
+          "name": "nom_test",
           "kind": "bin"
         }
       },
