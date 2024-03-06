@@ -1,0 +1,9 @@
+[package]
+name = "ron_example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+base64 = "0.21.3"
+ron = "0.8.1"
+serde = { version = "1", features = ["derive"] }
