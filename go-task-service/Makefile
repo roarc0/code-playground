@@ -3,6 +3,10 @@ BUILD_DIR := build
 .PHONY: all
 all: test
 
+.PHONY: start
+start:
+	go run ./...
+
 .PHONY: update
 update:
 	@go get -u -v ./...
