@@ -1,0 +1,19 @@
+{{define "create_article"}}
+    <div class="bg-white shadow-md rounded p-6 mb-4">
+        <h3 class="text-xl font-semibold mb-4">Create New Article</h3>
+        <form action="/create_article" method="POST">
+            <div class="mb-4">
+                <label for="title" class="block text-gray-700 font-bold mb-2">Title</label>
+                <input type="text" id="title" name="title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Title" required />
+
+            </div>
+            <div class="mb-4">
+                <label for="content" class="block text-gray-700 font-bold mb-2">Content</label>
+                <textarea id="content" name="content" rows="5" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Content" required></textarea>
+            </div>
+            <div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Post Article</button>
+            </div>
+        </form>
+    </div>
+{{end}}

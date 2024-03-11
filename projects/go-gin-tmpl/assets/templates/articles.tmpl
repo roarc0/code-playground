@@ -1,0 +1,19 @@
+{{define "articles"}}
+    {{ if .Error }}
+        <p class="bg-red-300 shadow-md rounded p-4 mb-4" >{{ .Error }}</p>
+    {{end }}
+    {{if not .Articles}}
+        <p class="bg-white shadow-md rounded p-4 mb-4" >No articles available</p>
+    {{else}}
+        {{range .Articles}}
+            <div class="bg-white shadow-md rounded mb-4">
+                <div class="p-4">
+                    <h3 class="text-xl font-semibold mb-2">{{.Title}}</h3>
+                    <p class="text-gray-700">{{.Content}}</p>
+                </div>
+            </div>
+        {{end}}
+    {{end}}
+
+    {{template "create_article" .}}
+{{end}}
