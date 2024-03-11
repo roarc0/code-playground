@@ -15,14 +15,14 @@ type ArticleService struct {
 	collection *mongo.Collection
 }
 
-type blogArticleDB struct {
+type dbArticle struct {
 	ID      primitive.ObjectID `bson:"_id,omitempty"`
 	Title   string             `bson:"title"`
 	Content string             `bson:"content"`
 	Date    time.Time          `bson:"date"`
 }
 
-func (b *blogArticleDB) ToModel() models.Article {
+func (b *dbArticle) ToModel() models.Article {
 	return models.Article{
 		ID:      b.ID.Hex(),
 		Title:   b.Title,
@@ -65,11 +65,12 @@ func (s *ArticleService) ReadByID(ctx context.Context, id string) (*models.Artic
 		return nil, err
 	}
 
-	var article models.Article
-	err = s.collection.FindOne(ctx, primitive.M{"_id": pID}).Decode(&article)
+	var da dbArticle
+	err = s.collection.FindOne(ctx, primitive.M{"_id": pID}).Decode(&da)
 	if err != nil {
 		return nil, err
 	}
+	article := da.ToModel()
 	return &article, nil
 }
 
@@ -84,7 +85,7 @@ func (s *ArticleService) ReadPaged(ctx context.Context, pageSize, pageNumber int
 		return nil, err
 	}
 
-	var articlesDB []*blogArticleDB
+	var articlesDB []*dbArticle
 	err = cursor.All(ctx, &articlesDB)
 	if err != nil {
 		return nil, err

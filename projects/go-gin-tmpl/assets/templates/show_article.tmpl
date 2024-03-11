@@ -1,7 +1,9 @@
-{{define "article"}}
+{{define "show_article"}}
     <div class="bg-white shadow-md rounded mb-4">
         <div class="p-4">
+            <a href="/article/{{.ID}}">
             <h3 class="text-xl font-semibold mb-2">{{.Title}}</h3>
+            </a>
             <p class="text-gray-700">{{.Content}}</p>
         </div>
     </div>

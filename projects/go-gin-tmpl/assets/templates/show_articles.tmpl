@@ -1,0 +1,9 @@
+{{define "show_articles"}}
+    {{if not .Articles}}
+        <p class="bg-white shadow-md rounded p-4 mb-4" >No articles available</p>
+    {{else}}
+        {{range .Articles}}
+            {{template "show_article" .}}
+        {{end}}
+    {{end}}
+{{end}}
