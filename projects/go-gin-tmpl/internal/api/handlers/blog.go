@@ -1,40 +1,38 @@
-package main
+package handlers
 
 import (
 	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/roarc0/go-gin-tmpl/assets"
-	"github.com/roarc0/go-gin-tmpl/database"
-	"github.com/roarc0/go-gin-tmpl/models"
 	"github.com/rs/zerolog/log"
+
+	"github.com/roarc0/go-gin-tmpl/internal/assets"
+	"github.com/roarc0/go-gin-tmpl/internal/database/repositories"
+	"github.com/roarc0/go-gin-tmpl/internal/models"
 )
 
 const (
 	blogTitle = "My Blog"
 )
 
-// Page is used to understand which page we want to render
-type Page struct {
+type page struct {
 	PageType  string
 	BlogTitle string
 	Error     error
 }
 
-// IndexPage represents a whole blog page
-type IndexPage struct {
-	Page
+type indexPage struct {
+	page
 	Articles []models.Article
 }
 
-// ArticlePage represents a whole blog page
-type ArticlePage struct {
-	Page
+type articlePage struct {
+	page
 	models.Article
 }
 
-func getBlogRouter(articleService *database.ArticleService) *gin.Engine {
+func blogHandler(articleRepository *repositories.ArticleRepository) *gin.Engine {
 	router := gin.Default()
 	router.SetHTMLTemplate(assets.Templates())
 
@@ -50,14 +48,14 @@ func getBlogRouter(articleService *database.ArticleService) *gin.Engine {
 			postError = errors.New(msg)
 		}
 
-		articles, err := articleService.ReadPaged(c.Request.Context(), 10, 1)
+		articles, err := articleRepository.ReadPaged(c.Request.Context(), 10, 1)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 
-		c.HTML(http.StatusOK, "index.tmpl", IndexPage{
-			Page: Page{
+		c.HTML(http.StatusOK, "index.tmpl", indexPage{
+			page: page{
 				BlogTitle: blogTitle,
 				Error:     postError,
 				PageType:  "index",
@@ -79,14 +77,14 @@ func getBlogRouter(articleService *database.ArticleService) *gin.Engine {
 		}
 		log.Info().Any("id", id.ID).Msg("id")
 
-		article, err := articleService.ReadByID(c.Request.Context(), id.ID)
+		article, err := articleRepository.ReadByID(c.Request.Context(), id.ID)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 
-		c.HTML(http.StatusOK, "index.tmpl", ArticlePage{
-			Page: Page{
+		c.HTML(http.StatusOK, "index.tmpl", articlePage{
+			page: page{
 				BlogTitle: blogTitle,
 				PageType:  "article",
 			},
@@ -101,7 +99,7 @@ func getBlogRouter(articleService *database.ArticleService) *gin.Engine {
 			return
 		}
 
-		if err := articleService.Create(c.Request.Context(), &article); err != nil {
+		if err := articleRepository.Create(c.Request.Context(), &article); err != nil {
 			c.Redirect(http.StatusSeeOther, "/?error=Error: creating post")
 			return
 		}

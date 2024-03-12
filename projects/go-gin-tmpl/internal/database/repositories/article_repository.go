@@ -1,17 +1,17 @@
-package database
+package repositories
 
 import (
 	"context"
 	"time"
 
-	"github.com/roarc0/go-gin-tmpl/models"
-	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/roarc0/go-gin-tmpl/internal/models"
 )
 
-type ArticleService struct {
+type ArticleRepository struct {
 	collection *mongo.Collection
 }
 
@@ -31,42 +31,27 @@ func (b *dbArticle) ToModel() models.Article {
 	}
 }
 
-func NewArticleService(ctx context.Context, connectionString, databaseName, collectionName string) (*ArticleService, error) {
-	log.Debug().Msg("Connecting to MongoDB")
-	clientOptions := options.Client().ApplyURI(connectionString)
-	client, err := mongo.Connect(ctx, clientOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Debug().Msg("Pinging MongoDB")
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	collection := client.Database(databaseName).Collection(collectionName)
-
-	return &ArticleService{collection: collection}, nil
+func NewArticleRepository(db *mongo.Database, collectionName string) *ArticleRepository {
+	return &ArticleRepository{collection: db.Collection(collectionName)}
 }
 
 // Create adds a new article to the db. If the time is zero it will get the current
-func (s *ArticleService) Create(ctx context.Context, article *models.Article) error {
+func (ar *ArticleRepository) Create(ctx context.Context, article *models.Article) error {
 	if article.Date.IsZero() {
 		article.Date = time.Now()
 	}
-	_, err := s.collection.InsertOne(ctx, article)
+	_, err := ar.collection.InsertOne(ctx, article)
 	return err
 }
 
-func (s *ArticleService) ReadByID(ctx context.Context, id string) (*models.Article, error) {
+func (ar *ArticleRepository) ReadByID(ctx context.Context, id string) (*models.Article, error) {
 	pID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
 	var da dbArticle
-	err = s.collection.FindOne(ctx, primitive.M{"_id": pID}).Decode(&da)
+	err = ar.collection.FindOne(ctx, primitive.M{"_id": pID}).Decode(&da)
 	if err != nil {
 		return nil, err
 	}
@@ -74,13 +59,13 @@ func (s *ArticleService) ReadByID(ctx context.Context, id string) (*models.Artic
 	return &article, nil
 }
 
-func (s *ArticleService) ReadPaged(ctx context.Context, pageSize, pageNumber int) ([]models.Article, error) {
+func (ar *ArticleRepository) ReadPaged(ctx context.Context, pageSize, pageNumber int) ([]models.Article, error) {
 	findOptions := options.Find()
 	findOptions.SetLimit(int64(pageSize))
 	findOptions.SetSkip(int64((pageNumber - 1) * pageSize))
 	findOptions.SetSort(primitive.D{{Key: "date", Value: -1}}) // Sort by date descending
 
-	cursor, err := s.collection.Find(ctx, primitive.M{}, findOptions)
+	cursor, err := ar.collection.Find(ctx, primitive.M{}, findOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -98,22 +83,22 @@ func (s *ArticleService) ReadPaged(ctx context.Context, pageSize, pageNumber int
 	return articles, nil
 }
 
-func (s *ArticleService) Update(ctx context.Context, article *models.Article) error {
+func (ar *ArticleRepository) Update(ctx context.Context, article *models.Article) error {
 	pID, err := primitive.ObjectIDFromHex(article.ID)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.collection.ReplaceOne(ctx, primitive.M{"_id": pID}, article)
+	_, err = ar.collection.ReplaceOne(ctx, primitive.M{"_id": pID}, article)
 	return err
 }
 
-func (s *ArticleService) Delete(ctx context.Context, id string) error {
+func (ar *ArticleRepository) Delete(ctx context.Context, id string) error {
 	pID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.collection.DeleteOne(ctx, primitive.M{"_id": pID})
+	_, err = ar.collection.DeleteOne(ctx, primitive.M{"_id": pID})
 	return err
 }
