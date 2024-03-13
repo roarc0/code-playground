@@ -8,7 +8,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 
-	"github.com/roarc0/go-task-service/models"
+	"github.com/roarc0/go-task-service/internal/config"
+	"github.com/roarc0/go-task-service/internal/models"
 )
 
 var (
@@ -30,14 +31,8 @@ type Store interface {
 	DeleteTask(taskID string) error
 }
 
-// StoreConfig is used to configure the
-type StoreConfig struct {
-	Type   string `yaml:"type"`
-	Params any    `yaml:"params,omitempty"`
-}
-
 // StoreFactory builds the taskstore given the configuration
-func StoreFactory(cfg StoreConfig, runner Runner) (Store, error) {
+func StoreFactory(cfg config.StoreConfig, runner Runner) (Store, error) {
 	switch cfg.Type {
 	case "badger":
 		b, err := yaml.Marshal(cfg.Params)

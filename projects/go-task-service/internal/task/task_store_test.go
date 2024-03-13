@@ -9,12 +9,13 @@ import (
 
 	"github.com/matryer/is"
 
-	"github.com/roarc0/go-task-service/models"
+	"github.com/roarc0/go-task-service/internal/config"
+	"github.com/roarc0/go-task-service/internal/models"
 )
 
 func TestTaskStoreFactory(t *testing.T) {
 	type args struct {
-		cfg StoreConfig
+		cfg config.StoreConfig
 	}
 	tests := []struct {
 		name   string
@@ -23,7 +24,7 @@ func TestTaskStoreFactory(t *testing.T) {
 	}{
 		{
 			name: "memory",
-			args: args{cfg: StoreConfig{Type: "memory"}},
+			args: args{cfg: config.StoreConfig{Type: "memory"}},
 			wantFn: func(t *testing.T, ts Store, err error) {
 				is := is.New(t)
 				is.NoErr(err)
@@ -34,7 +35,7 @@ func TestTaskStoreFactory(t *testing.T) {
 			},
 		}, {
 			name: "badger",
-			args: args{cfg: StoreConfig{Type: "badger", Params: map[string]any{
+			args: args{cfg: config.StoreConfig{Type: "badger", Params: map[string]any{
 				"in-memory": true,
 			}}},
 			wantFn: func(t *testing.T, ts Store, err error) {
@@ -57,7 +58,7 @@ func TestTaskStoreFactory(t *testing.T) {
 
 func TestTaskStore(t *testing.T) {
 	type args struct {
-		cfg StoreConfig
+		cfg config.StoreConfig
 	}
 	tests := []struct {
 		name string
@@ -67,24 +68,24 @@ func TestTaskStore(t *testing.T) {
 		{
 			name: "memory",
 			fn:   testTaskStore200,
-			args: args{cfg: StoreConfig{Type: "memory"}},
+			args: args{cfg: config.StoreConfig{Type: "memory"}},
 		},
 		{
 			name: "badger",
 			fn:   testTaskStore200,
-			args: args{cfg: StoreConfig{Type: "badger", Params: map[string]any{
+			args: args{cfg: config.StoreConfig{Type: "badger", Params: map[string]any{
 				"in-memory": true,
 			}}},
 		},
 		{
 			name: "memory_404",
 			fn:   testTaskStore404,
-			args: args{cfg: StoreConfig{Type: "memory"}},
+			args: args{cfg: config.StoreConfig{Type: "memory"}},
 		},
 		{
 			name: "badger_404",
 			fn:   testTaskStore404,
-			args: args{cfg: StoreConfig{Type: "badger", Params: map[string]any{
+			args: args{cfg: config.StoreConfig{Type: "badger", Params: map[string]any{
 				"in-memory": true,
 			}}},
 		},

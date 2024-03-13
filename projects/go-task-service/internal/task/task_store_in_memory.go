@@ -5,7 +5,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/roarc0/go-task-service/models"
+	"github.com/roarc0/go-task-service/internal/models"
 )
 
 // StoreInMemory is a very simple example implementation for a task store.

@@ -8,7 +8,7 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 
-	"github.com/roarc0/go-task-service/models"
+	"github.com/roarc0/go-task-service/internal/models"
 )
 
 // StoreBadger is an implementation for a task store.

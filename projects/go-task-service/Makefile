@@ -7,6 +7,14 @@ all: test
 start:
 	go run ./...
 
+.PHONY: compose_up
+compose_up:
+	podman compose -f docker-compose.yaml up -d
+
+.PHONY: compose_down
+compose_down:
+	podman compose -f docker-compose.yaml down
+
 .PHONY: update
 update:
 	@go get -u -v ./...

@@ -10,8 +10,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog/log"
 
-	"github.com/roarc0/go-task-service/models"
-	"github.com/roarc0/go-task-service/task"
+	"github.com/roarc0/go-task-service/internal/config"
+	"github.com/roarc0/go-task-service/internal/models"
+	"github.com/roarc0/go-task-service/internal/task"
 )
 
 type taskCtxKey string
@@ -24,6 +25,16 @@ const (
 // TaskController implements the HTTP server that makes HTTP request to a third party
 type TaskController struct {
 	taskStore task.Store
+}
+
+func NewDefaultTaskController(ctx context.Context, cfg *config.Config) *TaskController {
+	taskRunner := task.NewRunner()
+	taskStore, err := task.StoreFactory(cfg.TaskStore, taskRunner)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create task store")
+	}
+	taskStore.Start(ctx)
+	return NewTaskController(taskStore)
 }
 
 // NewTaskController creates a new server

@@ -8,7 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/matryer/is"
-	"github.com/roarc0/go-task-service/models"
+
+	"github.com/roarc0/go-task-service/internal/models"
 )
 
 func TestRunNewTask(t *testing.T) {
@@ -20,14 +21,14 @@ func TestRunNewTask(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer mockServer.Close()
-	tr := &taskRunnerImpl{httpClient: mockServer.Client()}
 
-	updateChan := make(chan models.TaskResult, 1)
+	updateChan := make(chan models.TaskResult)
 	id := uuid.NewString()
 	task := models.Task{
 		TaskCreate: models.TaskCreate{Method: "GET", URL: mockServer.URL},
 		TaskResult: models.TaskResult{ID: id, Status: models.StatusNew},
 	}
+	tr := &taskRunnerImpl{httpClient: mockServer.Client()}
 	err := tr.Run(task, updateChan)
 	is.NoErr(err)
 

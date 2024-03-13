@@ -1,7 +1,6 @@
 package task
 
 import (
-	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -9,7 +8,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/roarc0/go-task-service/models"
+	"github.com/roarc0/go-task-service/internal/models"
 )
 
 // Runner executes the task calling a 3rd party service. It reports the updates through a channel.
@@ -100,10 +99,7 @@ func updateTask(updateChan chan<- models.TaskResult, task *models.Task) {
 }
 
 func (tr *taskRunnerImpl) HTTPCall(taskCreate models.TaskCreate) (*http.Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), tr.httpClient.Timeout)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(ctx, taskCreate.Method, taskCreate.URL, nil)
+	req, err := http.NewRequest(taskCreate.Method, taskCreate.URL, nil)
 	if err != nil {
 		return nil, err
 	}

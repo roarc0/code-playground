@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"bytes"
@@ -13,11 +13,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/matryer/is"
+	"github.com/rs/zerolog/log"
 
-	"github.com/roarc0/go-task-service/models"
+	"github.com/roarc0/go-task-service/internal/api/controllers"
+	"github.com/roarc0/go-task-service/internal/config"
+	"github.com/roarc0/go-task-service/internal/models"
 )
 
-func TestServeCreate(t *testing.T) {
+func TestApiCreate(t *testing.T) {
 	is := is.New(t)
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -27,8 +30,17 @@ func TestServeCreate(t *testing.T) {
 		w.Write([]byte("ok"))
 	}))
 
-	cfg := defaultConfig
-	go serve(ctx, &cfg)
+	cfg := &defaultConfig
+
+	go func() {
+		taskController := controllers.NewDefaultTaskController(ctx, cfg)
+		srv, err := NewAPI(cfg, taskController.Handler(), &log.Logger)
+		is.NoErr(err)
+		if err := srv.Run(ctx); err != nil {
+			is.NoErr(err)
+		}
+	}()
+
 	time.Sleep(50 * time.Millisecond)
 
 	taskCreate := models.TaskCreate{
@@ -56,7 +68,7 @@ func TestServeCreate(t *testing.T) {
 	is.True(reflect.DeepEqual(expectedTaskResult, *taskResult))
 }
 
-func testGetTaskUntilDone(t *testing.T, cfg Config, id string, timeoutDuration time.Duration) *models.TaskResult {
+func testGetTaskUntilDone(t *testing.T, cfg *config.Config, id string, timeoutDuration time.Duration) *models.TaskResult {
 	is := is.New(t)
 
 	var timeout <-chan time.Time
@@ -85,9 +97,9 @@ func testGetTaskUntilDone(t *testing.T, cfg Config, id string, timeoutDuration t
 	return taskResult
 }
 
-func testGetTask(is *is.I, cfg Config, id string) (*models.TaskResult, error) {
+func testGetTask(is *is.I, cfg *config.Config, id string) (*models.TaskResult, error) {
 	var buf bytes.Buffer
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/task/%s", cfg.ListenAddress, id), &buf)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/task/%s", cfg.Addr(), id), &buf)
 	is.NoErr(err)
 
 	res, err := http.DefaultClient.Do(req)
@@ -103,12 +115,12 @@ func testGetTask(is *is.I, cfg Config, id string) (*models.TaskResult, error) {
 	return &taskResult, nil
 }
 
-func testCreateTask(is *is.I, cfg Config, taskCreate models.TaskCreate) models.TaskCreated {
+func testCreateTask(is *is.I, cfg *config.Config, taskCreate models.TaskCreate) models.TaskCreated {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(taskCreate)
 	is.NoErr(err)
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s/task", cfg.ListenAddress), &buf)
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s/task", cfg.Addr()), &buf)
 	is.NoErr(err)
 
 	res, err := http.DefaultClient.Do(req)
@@ -122,4 +134,12 @@ func testCreateTask(is *is.I, cfg Config, taskCreate models.TaskCreate) models.T
 	is.NoErr(err)
 
 	return taskCreated
+}
+
+var defaultConfig = config.Config{
+	ListenAddress: "localhost",
+	Port:          8080,
+	TaskStore: config.StoreConfig{
+		Type: "memory",
+	},
 }
