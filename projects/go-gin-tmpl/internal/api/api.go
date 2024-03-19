@@ -39,7 +39,7 @@ func NewAPI(cfg *config.Config, handlers *handlers.Handlers, log *zerolog.Logger
 // Run starts the api server
 func (a *API) Run() error {
 	srv := &http.Server{
-		Addr:         a.cfg.ListenAddress(),
+		Addr:         a.cfg.Address(),
 		Handler:      a.router,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,

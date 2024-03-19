@@ -18,7 +18,7 @@ func Connect(cfg *config.Config) (*mongo.Database, error) {
 	log.Debug().Msg("Connecting to MongoDB")
 
 	clientOptions := options.Client().
-		ApplyURI(cfg.DB.URI).
+		ApplyURI(cfg.DBURI()).
 		SetMaxConnIdleTime(time.Duration(cfg.DB.MaxIdleConns)).
 		SetMaxConnecting(uint64(cfg.DB.MaxOpenConns)).
 		SetMaxPoolSize(uint64(cfg.DB.MaxOpenConns))

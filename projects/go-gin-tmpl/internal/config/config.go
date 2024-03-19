@@ -8,11 +8,14 @@ import (
 )
 
 type Config struct {
-	Env     string
-	Address string
-	Port    uint
-	DB      struct {
-		URI          string
+	Env           string
+	ListenAddress string
+	ListenPort    uint
+	DB            struct {
+		User         string
+		Password     string
+		Address      string
+		Port         uint
 		MaxOpenConns int
 		MaxIdleConns int
 		MaxIdleTime  string
@@ -35,19 +38,33 @@ func NewConfig() *Config {
 	return &Config{}
 }
 
-func (cfg *Config) ListenAddress() string {
-	return fmt.Sprintf("%s:%d", cfg.Address, cfg.Port)
+func (cfg *Config) Address() string {
+	return fmt.Sprintf("%s:%d", cfg.ListenAddress, cfg.ListenPort)
+}
+
+func (cfg *Config) DBURI() string {
+	return fmt.Sprintf("mongodb://%s:%s@%s:%d", cfg.DB.User, cfg.DB.Password, cfg.DB.Address, cfg.DB.Port)
 }
 
 func (cfg *Config) ParseFlags() error {
 	flag.StringVar(&cfg.Env, "env", os.Getenv("ENV"), "Env type (production,development)")
-	flag.StringVar(&cfg.Address, "address", os.Getenv("ADDRESS"), "API server address")
-	port, err := strconv.Atoi(os.Getenv("PORT"))
+
+	flag.StringVar(&cfg.ListenAddress, "address", os.Getenv("LISTEN_ADDRESS"), "API server address")
+	listenPort, err := strconv.Atoi(os.Getenv("LISTEN_PORT"))
 	if err != nil {
 		return err
 	}
-	flag.UintVar(&cfg.Port, "port", uint(port), "API server port")
-	flag.StringVar(&cfg.DB.URI, "db-uri", os.Getenv("DB_URI"), "MongoDB URI")
+	flag.UintVar(&cfg.ListenPort, "listen-port", uint(listenPort), "API server port")
+
+	flag.StringVar(&cfg.DB.User, "db-user", os.Getenv("DB_USER"), "MongoDB User")
+	flag.StringVar(&cfg.DB.Password, "db-password", os.Getenv("DB_PASSWORD"), "MongoDB Password")
+	flag.StringVar(&cfg.DB.Address, "db-address", os.Getenv("DB_ADDRESS"), "MongoDB Address")
+	dbPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		return err
+	}
+	flag.UintVar(&cfg.DB.Port, "db-port", uint(dbPort), "MongoDB Port")
+
 	flag.IntVar(&cfg.DB.MaxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.DB.MaxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.DB.MaxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")

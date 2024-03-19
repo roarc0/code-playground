@@ -15,14 +15,11 @@ import (
 func main() {
 	logger.SetupLogger(false)
 
-	err := godotenv.Load(".env.dev")
-	if err != nil {
-		log.Fatal().Err(err).Msg("Error loading .env")
-	}
+	godotenv.Load(".env.dev")
 
 	cfg := config.NewConfig()
 
-	err = cfg.ParseFlags()
+	err := cfg.ParseFlags()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to parse command-line flags")
 	}
